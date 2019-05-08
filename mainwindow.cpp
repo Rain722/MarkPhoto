@@ -4,7 +4,11 @@
 #include <iostream>
 #include <cstring>
 #include <io.h>
+#include <qt_windows.h>
 #include <vector>
+#include <qtextbrowser.h>
+#include <QMessageBox>
+#include <QLabel>
 
 bool startWith(std::string s, std::string sub) {
     transform(s.begin(),s.end(),s.begin(),::tolower);
@@ -89,6 +93,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->setMinimumSize(608,648);
+    this->setMaximumSize(608,648);
+    setWindowTitle(tr("数据可视化工具"));
 }
 
 MainWindow::~MainWindow()
@@ -122,19 +129,70 @@ void MainWindow::on_XML_clicked()
 
 }
 
+class DialogMsg{
+public:
+    DialogMsg(){
+        lb = new QLabel();
+        dlg = new QDialog();
+        ft.setPointSize(15);
+        lb->setFont(ft);
+        lb->setGeometry(0,0,400,100);//设置位置和大小
+        lb->setAlignment(Qt::AlignCenter);//对齐方式
+        dlg->setMinimumSize(400,100);
+        dlg->setMaximumSize(400,100);
+        lb->setParent(dlg);
+        dlg->setModal(true);
+        Qt::WindowFlags flags= dlg->windowFlags();
+        dlg->setWindowFlags(flags&~Qt::WindowContextHelpButtonHint&~Qt::WindowCloseButtonHint);
+    }
+    void showMsg(int msgNum){
+        char s[100] = {0};
+        sprintf(s, "共发现%d对匹配，处理中...", msgNum);
+        lb->setText(s);
+        dlg->setVisible(true);
+    }
+    void disShow(){
+        dlg->setVisible(false);
+    }
+private:
+    QLabel* lb = nullptr;
+    QFont ft;
+    QDialog* dlg = nullptr;
+};
+
 //自定义数据格式
 void MainWindow::on_Customized_clicked()
 {
+
     std::string sourcePicdirectory = QFileDialog::getExistingDirectory(this, "选择包含原始jpg文件的文件夹", "/").toStdString();
+    if(sourcePicdirectory == "") {
+        QMessageBox::critical(this,"错误","未选择文件夹!");
+        return;
+    }
     auto pic_names = listFiles(sourcePicdirectory, "jpg;png");
 
+
     std::string txtDatadirectory = QFileDialog::getExistingDirectory(this, "选择包含自定义数据的文件夹", "").toStdString();
+    if(txtDatadirectory == "") {
+        QMessageBox::critical(this,"错误","未选择文件夹!");
+        return;
+    }
     auto txt_names = listFiles(txtDatadirectory, "txt");
 
     auto data_pair = getCommonStrPair(pic_names, txt_names);
+    if(data_pair.size() > 0) {
 
-    for(auto &i : data_pair){
-        std::cout<<i.first<<" "<<i.second<<std::endl;
+        DialogMsg msg;
+        msg.showMsg(int(data_pair.size()));
+        Sleep(10000);
+        for(int i=0; i<800000; ++i){
+            std::cout<<"hh"<<std::endl;
+        }
+        msg.disShow();
+        QMessageBox::information(this,"OK","处理完成!");
+    }
+    else {
+        QMessageBox::critical(this,"错误","未发现相匹配的文件!");
     }
 
 }
