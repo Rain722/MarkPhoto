@@ -9,6 +9,39 @@
 #include <qtextbrowser.h>
 #include <QMessageBox>
 #include <QLabel>
+#include <QColor>
+#include <thread>
+
+class DialogMsg{
+public:
+    DialogMsg(){
+        lb = new QLabel();
+        dlg = new QDialog();
+        ft.setPointSize(15);
+        lb->setFont(ft);
+        lb->setGeometry(0,0,400,100);//设置位置和大小
+        lb->setAlignment(Qt::AlignCenter);//对齐方式
+        dlg->setMinimumSize(400,100);
+        dlg->setMaximumSize(400,100);
+        lb->setParent(dlg);
+        dlg->setModal(true);
+        Qt::WindowFlags flags= dlg->windowFlags();
+        dlg->setWindowFlags(flags&~Qt::WindowContextHelpButtonHint&~Qt::WindowCloseButtonHint);
+    }
+    void showMsg(int msgNum){
+        char s[100] = {0};
+        sprintf(s, "共发现%d对匹配，处理中...", msgNum);
+        lb->setText(s);
+        dlg->setVisible(true);
+    }
+    void disShow(){
+        dlg->setVisible(false);
+    }
+private:
+    QLabel* lb = nullptr;
+    QFont ft;
+    QDialog* dlg = nullptr;
+};
 
 bool startWith(std::string s, std::string sub) {
     transform(s.begin(),s.end(),s.begin(),::tolower);
@@ -75,6 +108,7 @@ std::vector<std::pair<std::string, std::string>>
     std::vector<std::pair<std::string, std::string> > pair_arr;
     for(auto &i : pic_names){
         for(auto &j : data_names) {
+//            std::cout<<i<<" "<<j<<std::endl;
             auto istart = i.rfind("/"), iend = i.rfind(".");
             auto jstart = j.rfind("/"), jend = j.rfind(".");
             if(iend-istart != jend-jstart)
@@ -106,9 +140,75 @@ MainWindow::~MainWindow()
 //像素点数据格式
 void MainWindow::on_Pixel_clicked()
 {
+    //原始图片
     std::string sourcePicdirectory = QFileDialog::getExistingDirectory(this, "选择包含原始jpg文件的文件夹", "/").toStdString();
+    if(sourcePicdirectory == "") {
+        QMessageBox::critical(this,"错误","未选择文件夹!");
+        return;
+    }
     auto pic_names = listFiles(sourcePicdirectory, "jpg;png");
 
+    //像素数据
+    std::string pixDatadirectory = QFileDialog::getExistingDirectory(this, "选择包含像素点数据的文件夹", "/").toStdString();
+    if(pixDatadirectory == "") {
+        QMessageBox::critical(this,"错误","未选择文件夹!");
+        return;
+    }
+    auto pix_names = listFiles(pixDatadirectory, "png;jpg");
+
+    auto data_pair = getCommonStrPair(pic_names, pix_names);
+    if(data_pair.size() > 0) {
+        DialogMsg msg;
+        msg.showMsg(int(data_pair.size()));
+        std::string outPutDirectory = QFileDialog::getExistingDirectory(this, "选择输出文件夹", "/").toStdString();
+        int errorCount = 0;
+        //多线程处理
+        auto processPic = [&](int process_num, int process_id){
+            for(int it=process_id; it<int(data_pair.size()); it+=process_num) {
+                auto &i = data_pair[size_t(it)];
+                QImage pic, pix;
+                pic.load(i.first.c_str());
+                pix.load(i.second.c_str());
+                if(pic.size().width()!=pix.size().width() || pic.size().height()!=pix.size().height()){
+                    errorCount ++;
+                    continue;
+                }
+                QColor color;
+                for(int i=0; i<pic.size().width(); ++i) {
+                    for(int j=0; j<pic.size().height(); ++j) {
+                        int r = qRed(pix.pixel(i, j)), b = qBlue(pix.pixel(i, j)), g = qGreen(pix.pixel(i, j));
+                        if(r!=0 || g!=0 || b!=0) {
+                            color.setRed(r);
+                            color.setBlue(b);
+                            color.setGreen(g);
+                            pic.setPixelColor(i,j,color);
+                        }
+                    }
+                }
+                std::string outPutPath = outPutDirectory + std::string("\\") +
+                        i.first.substr(i.first.rfind("/")+1, i.first.rfind(".")-i.first.rfind("/")-1)
+                        + std::string(".res.jpg");
+                pic.save(outPutPath.c_str());
+            }
+        };
+        const int process_num = 6;
+        std::thread process[process_num];
+        for(int i=0; i<process_num; ++i)
+            process[i] = std::thread(processPic, process_num, i);
+        for(int i=0; i<process_num; ++i)
+            process[i].join();
+
+        msg.disShow();
+        char s[100];
+        if(errorCount != 0)
+            sprintf(s, "处理完成，期中%d对发生错误(分辨率不匹配)!", errorCount);
+        else
+            sprintf(s, "处理完成!");
+        QMessageBox::information(this,"OK",s);
+    }
+    else {
+        QMessageBox::critical(this,"错误","未发现相匹配的文件!");
+    }
 
 }
 
@@ -129,41 +229,10 @@ void MainWindow::on_XML_clicked()
 
 }
 
-class DialogMsg{
-public:
-    DialogMsg(){
-        lb = new QLabel();
-        dlg = new QDialog();
-        ft.setPointSize(15);
-        lb->setFont(ft);
-        lb->setGeometry(0,0,400,100);//设置位置和大小
-        lb->setAlignment(Qt::AlignCenter);//对齐方式
-        dlg->setMinimumSize(400,100);
-        dlg->setMaximumSize(400,100);
-        lb->setParent(dlg);
-        dlg->setModal(true);
-        Qt::WindowFlags flags= dlg->windowFlags();
-        dlg->setWindowFlags(flags&~Qt::WindowContextHelpButtonHint&~Qt::WindowCloseButtonHint);
-    }
-    void showMsg(int msgNum){
-        char s[100] = {0};
-        sprintf(s, "共发现%d对匹配，处理中...", msgNum);
-        lb->setText(s);
-        dlg->setVisible(true);
-    }
-    void disShow(){
-        dlg->setVisible(false);
-    }
-private:
-    QLabel* lb = nullptr;
-    QFont ft;
-    QDialog* dlg = nullptr;
-};
 
 //自定义数据格式
 void MainWindow::on_Customized_clicked()
 {
-
     std::string sourcePicdirectory = QFileDialog::getExistingDirectory(this, "选择包含原始jpg文件的文件夹", "/").toStdString();
     if(sourcePicdirectory == "") {
         QMessageBox::critical(this,"错误","未选择文件夹!");
