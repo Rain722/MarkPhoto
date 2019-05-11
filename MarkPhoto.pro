@@ -26,10 +26,16 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+        tinystr.cpp \
+        tinyxml.cpp \
+        tinyxmlerror.cpp \
+        tinyxmlparser.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+        tinystr.h \
+        tinyxml.h
 
 FORMS += \
         mainwindow.ui
