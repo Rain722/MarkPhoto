@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "include/mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QFileDialog>
 #include <iostream>
@@ -17,8 +17,8 @@
 #include <cstdio>
 #include <QPainter>
 
-#include "tinystr.h"
-#include "tinyxml.h"
+#include "include/tiny/tinystr.h"
+#include "include/tiny/tinyxml.h"
 
 class DialogMsg{
 public:

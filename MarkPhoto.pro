@@ -25,17 +25,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp \
-        tinystr.cpp \
-        tinyxml.cpp \
-        tinyxmlerror.cpp \
-        tinyxmlparser.cpp
+        src/main.cpp \
+        src/mainwindow.cpp \
+        src/tiny/tinystr.cpp \
+        src/tiny/tinyxml.cpp \
+        src/tiny/tinyxmlerror.cpp \
+        src/tiny/tinyxmlparser.cpp
 
 HEADERS += \
-        mainwindow.h \
-        tinystr.h \
-        tinyxml.h
+        include/mainwindow.h \
+        include/tiny/tinystr.h \
+        include/tiny/tinyxml.h
 
 FORMS += \
         mainwindow.ui
