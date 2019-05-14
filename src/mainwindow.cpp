@@ -149,7 +149,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_Pixel_clicked()
 {
     //原始图片
-    std::string sourcePicdirectory = QFileDialog::getExistingDirectory(this, "选择包含原始jpg文件的文件夹", "/").toStdString();
+    std::string sourcePicdirectory = QFileDialog::getExistingDirectory(this, "选择包含原始jpg文件的文件夹", "/").toLocal8Bit().toStdString();
     if(sourcePicdirectory == "") {
         QMessageBox::critical(this,"错误","未选择文件夹!");
         return;
@@ -157,7 +157,7 @@ void MainWindow::on_Pixel_clicked()
     auto pic_names = listFiles(sourcePicdirectory, "jpg;png");
 
     //像素数据
-    std::string pixDatadirectory = QFileDialog::getExistingDirectory(this, "选择包含像素点数据的文件夹", "/").toStdString();
+    std::string pixDatadirectory = QFileDialog::getExistingDirectory(this, "选择包含像素点数据的文件夹", "/").toLocal8Bit().toStdString();
     if(pixDatadirectory == "") {
         QMessageBox::critical(this,"错误","未选择文件夹!");
         return;
@@ -168,7 +168,7 @@ void MainWindow::on_Pixel_clicked()
     if(data_pair.size() > 0) {
         DialogMsg msg;
         msg.showMsg(int(data_pair.size()));
-        std::string outPutDirectory = QFileDialog::getExistingDirectory(this, "选择输出文件夹", "/").toStdString();
+        std::string outPutDirectory = QFileDialog::getExistingDirectory(this, "选择输出文件夹", "/").toLocal8Bit().toStdString();
         int errorCount = 0;
         //多线程处理
         auto processPic = [&](int process_num, int process_id){
@@ -196,7 +196,7 @@ void MainWindow::on_Pixel_clicked()
                 pic.save(outPutPath.c_str());
             }
         };
-        const int process_num = 6;
+        const int process_num = 8;
         std::thread process[process_num];
         for(int i=0; i<process_num; ++i)
             process[i] = std::thread(processPic, process_num, i);
@@ -232,17 +232,12 @@ struct BoxSize
 bool ReadParaXml(std::string m_strXmlPath, std::vector<BoxSize>& vecNode)
 {
     BoxSize *pNode = new BoxSize;
-
     //读取xml文件中的参数值
     TiXmlDocument* Document = new TiXmlDocument();
-    if(!Document->LoadFile(m_strXmlPath.c_str()))
-    {
-        std::cout << "无法加载xml文件！" << std::endl;
-        std::cin.get();
+    TiXmlElement* RootElement = Document->RootElement();		//根目录
+    if(!Document->LoadFile(m_strXmlPath.c_str())) {
         return false;
     }
-    TiXmlElement* RootElement = Document->RootElement();		//根目录
-
     TiXmlElement* NextElement = RootElement->FirstChildElement();		//根目录下的第一个节点层
     //for(NextElement;NextElement;NextElement = NextElement->NextSiblingElement())
     while(NextElement!=nullptr)		//判断有没有读完
@@ -250,7 +245,6 @@ bool ReadParaXml(std::string m_strXmlPath, std::vector<BoxSize>& vecNode)
         if(NextElement->ValueTStr() == "object")		//读到object节点
         {
             //NextElement = NextElement->NextSiblingElement();
-
             TiXmlElement* BoxElement = NextElement->FirstChildElement();
             while(BoxElement->ValueTStr() != "bndbox")		//读到box节点
             {
@@ -277,14 +271,14 @@ bool ReadParaXml(std::string m_strXmlPath, std::vector<BoxSize>& vecNode)
         }
         NextElement = NextElement->NextSiblingElement();
     }
-
     //释放内存
     delete pNode;
     delete Document;
-    std::cout << "完成xml的读取" << std::endl;
     return true;
 }
 bool ReadFromTxt(const char* m_strXmlPath, std::vector<BoxSize>& vecNode) {
+    if(m_strXmlPath == nullptr)
+        return false;
     std::fstream f(m_strXmlPath);
     std::string line;
     while (getline(f, line))
@@ -311,7 +305,7 @@ bool ReadFromTxt(const char* m_strXmlPath, std::vector<BoxSize>& vecNode) {
 void MainWindow::on_XML_clicked()
 {
     //原始图片
-    std::string sourcePicdirectory = QFileDialog::getExistingDirectory(this, "选择包含原始jpg文件的文件夹", "/").toStdString();
+    std::string sourcePicdirectory = QFileDialog::getExistingDirectory(this, "选择包含原始jpg文件的文件夹", "/").toLocal8Bit().toStdString();
     if(sourcePicdirectory == "") {
         QMessageBox::critical(this,"错误","未选择文件夹!");
         return;
@@ -319,7 +313,7 @@ void MainWindow::on_XML_clicked()
     auto pic_names = listFiles(sourcePicdirectory, "jpg;png");
 
     //xml数据
-    std::string xmlDatadirectory = QFileDialog::getExistingDirectory(this, "选择包含XML数据的文件夹", "/").toStdString();
+    std::string xmlDatadirectory = QFileDialog::getExistingDirectory(this, "选择包含XML数据的文件夹", "/").toLocal8Bit().toStdString();
     if(xmlDatadirectory == "") {
         QMessageBox::critical(this,"错误","未选择文件夹!");
         return;
@@ -327,19 +321,27 @@ void MainWindow::on_XML_clicked()
     auto xml_names = listFiles(xmlDatadirectory, "xml");
 
     auto data_pair = getCommonStrPair(pic_names, xml_names);
+    std::atomic_int errorXML(0);
+    std::atomic_int errorPic(0);
     if(data_pair.size() > 0) {
         DialogMsg msg;
         msg.showMsg(int(data_pair.size()));
-        std::string outPutDirectory = QFileDialog::getExistingDirectory(this, "选择输出文件夹", "/").toStdString();
+        std::string outPutDirectory = QFileDialog::getExistingDirectory(this, "选择输出文件夹", "/").toLocal8Bit().toStdString();
         int errorCount = 0;
         //多线程处理
         auto processPic = [&](int process_num, int process_id){
             for(int it=process_id; it<int(data_pair.size()); it+=process_num) {
                 auto &i = data_pair[size_t(it)];
                 QImage pic;
-                pic.load(i.first.c_str());
+                if(!pic.load(i.first.c_str())) {
+                    errorPic ++;
+                    continue;
+                }
                 std::vector<BoxSize> lines;
-                ReadParaXml(i.second.c_str(), lines);
+                if(!ReadParaXml(i.second.c_str(), lines)) {
+                    errorXML ++;
+                    continue;
+                }
                 QPainter painter(&pic);
                 QPen pen = painter.pen();
                 pen.setWidth(3);
@@ -354,7 +356,7 @@ void MainWindow::on_XML_clicked()
                 pic.save(outPutPath.c_str());
             }
         };
-        const int process_num = 6;
+        const int process_num = 8;
         std::thread process[process_num];
         for(int i=0; i<process_num; ++i)
             process[i] = std::thread(processPic, process_num, i);
@@ -379,7 +381,7 @@ void MainWindow::on_XML_clicked()
 void MainWindow::on_Customized_clicked()
 {
     //原始图片
-    std::string sourcePicdirectory = QFileDialog::getExistingDirectory(this, "选择包含原始jpg文件的文件夹", "/").toStdString();
+    std::string sourcePicdirectory = QFileDialog::getExistingDirectory(this, "选择包含原始jpg文件的文件夹", "/").toLocal8Bit().toStdString();
     if(sourcePicdirectory == "") {
         QMessageBox::critical(this,"错误","未选择文件夹!");
         return;
@@ -387,7 +389,7 @@ void MainWindow::on_Customized_clicked()
     auto pic_names = listFiles(sourcePicdirectory, "jpg;png");
 
     //xml数据
-    std::string txtDatadirectory = QFileDialog::getExistingDirectory(this, "选择包含TXT数据的文件夹", "/").toStdString();
+    std::string txtDatadirectory = QFileDialog::getExistingDirectory(this, "选择包含TXT数据的文件夹", "/").toLocal8Bit().toStdString();
     if(txtDatadirectory == "") {
         QMessageBox::critical(this,"错误","未选择文件夹!");
         return;
@@ -398,16 +400,24 @@ void MainWindow::on_Customized_clicked()
     if(data_pair.size() > 0) {
         DialogMsg msg;
         msg.showMsg(int(data_pair.size()));
-        std::string outPutDirectory = QFileDialog::getExistingDirectory(this, "选择输出文件夹", "/").toStdString();
+        std::string outPutDirectory = QFileDialog::getExistingDirectory(this, "选择输出文件夹", "/").toLocal8Bit().toStdString();
         int errorCount = 0;
         //多线程处理
+        std::atomic_int errorTXT(0);
+        std::atomic_int errorPic(0);
         auto processPic = [&](int process_num, int process_id){
             for(int it=process_id; it<int(data_pair.size()); it+=process_num) {
                 auto &i = data_pair[size_t(it)];
                 QImage pic;
-                pic.load(i.first.c_str());
+                if(!pic.load(i.first.c_str())){
+                    errorPic ++;
+                    continue;
+                }
                 std::vector<BoxSize> lines;
-                ReadFromTxt(i.second.c_str(), lines);
+                if(!ReadFromTxt(i.second.c_str(), lines)){
+                    errorTXT ++;
+                    continue;
+                }
                 std::sort(lines.begin(), lines.end());
                 QPainter painter(&pic);
                 QPen pen = painter.pen();
@@ -415,7 +425,7 @@ void MainWindow::on_Customized_clicked()
                 pen.setColor(QColor(250,0,0));
                 painter.setPen(pen);
                 for(int i=0; i<15&&i<int(lines.size()); ++i) {
-                    auto &p = lines[i];
+                    auto &p = lines[size_t(i)];
                     std::cout<<p.Score<<std::endl;
                     painter.drawRect(p.xMin,p.yMin,p.xMax-p.xMin,p.yMax-p.yMin);
                 }
@@ -426,7 +436,7 @@ void MainWindow::on_Customized_clicked()
                 pic.save(outPutPath.c_str());
             }
         };
-        const int process_num = 6;
+        const int process_num = 8;
         std::thread process[process_num];
         for(int i=0; i<process_num; ++i)
             process[i] = std::thread(processPic, process_num, i);
