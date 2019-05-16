@@ -29,7 +29,9 @@ HEADERS += \
         include/tinyXML/tinystr.h \
         include/tinyXML/tinyxml.h \
         include/strTools.h \
-        include/dataReader.h
+        include/dataReader.h \
+        include/dataProcess.h \
+        include/DialogMsg.h
 
 SOURCES += \
         src/main.cpp \
@@ -39,7 +41,9 @@ SOURCES += \
         src/tinyXML/tinyxmlerror.cpp \
         src/tinyXML/tinyxmlparser.cpp \
         src/strTools.cpp \
-        src/dataReader.cpp
+        src/dataReader.cpp \
+        src/dataProcess.cpp \
+        src/DialogMsg.cpp
 
 FORMS += \
         mainwindow.ui
