@@ -196,7 +196,7 @@ void MainWindow::on_Pixel_clicked()
                 pic.save(outPutPath.c_str());
             }
         };
-        const int process_num = 8;
+        const int process_num = 6;
         std::thread process[process_num];
         for(int i=0; i<process_num; ++i)
             process[i] = std::thread(processPic, process_num, i);
@@ -356,7 +356,7 @@ void MainWindow::on_XML_clicked()
                 pic.save(outPutPath.c_str());
             }
         };
-        const int process_num = 8;
+        const int process_num = 6;
         std::thread process[process_num];
         for(int i=0; i<process_num; ++i)
             process[i] = std::thread(processPic, process_num, i);
@@ -436,7 +436,7 @@ void MainWindow::on_Customized_clicked()
                 pic.save(outPutPath.c_str());
             }
         };
-        const int process_num = 8;
+        const int process_num = 6;
         std::thread process[process_num];
         for(int i=0; i<process_num; ++i)
             process[i] = std::thread(processPic, process_num, i);
