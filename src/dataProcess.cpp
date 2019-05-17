@@ -13,6 +13,9 @@
 #include "include/strTools.h"
 #include "include/dataProcess.h"
 #include "include/DialogMsg.h"
+#include "include/searchfilter.h"
+#include "include/imageviewer.h"
+#include "include/mainwindow.h"
 
 //像素点数据格式
 void pixDataProcess()

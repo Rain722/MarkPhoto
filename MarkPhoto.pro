@@ -31,7 +31,9 @@ HEADERS += \
         include/strTools.h \
         include/dataReader.h \
         include/dataProcess.h \
-        include/DialogMsg.h
+        include/DialogMsg.h\
+        include/imageviewer.h \
+        include/searchfilter.h
 
 SOURCES += \
         src/main.cpp \
@@ -43,7 +45,9 @@ SOURCES += \
         src/strTools.cpp \
         src/dataReader.cpp \
         src/dataProcess.cpp \
-        src/DialogMsg.cpp
+        src/DialogMsg.cpp \
+        src/imageviewer.cpp \
+        src/searchfilter.cpp
 
 FORMS += \
         mainwindow.ui
