@@ -20,11 +20,12 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::showPicBorse() {
+void MainWindow::showPicBorse(std::string path) {
+    path += std::string("\\");
     picBorse = new QMainWindow();
     picBorse->setMinimumSize(1308,948);
     picBorse->setMaximumSize(1308,948);
-    dir_str = "D:\\data\\JPEGImages\\";
+    dir_str = path.c_str();
     QStringList filters;
     filters << "*.jpg";
     m_widget_search_filter = new SearchFilter();  //文件浏览
@@ -46,18 +47,26 @@ void MainWindow::showPicBorse() {
 
 //像素点数据格式
 void MainWindow::on_Pixel_clicked() {
-    showPicBorse();
-    pixDataProcess();
+    std::string outPutPath;
+    if(pixDataProcess(outPutPath)) {
+        showPicBorse(outPutPath);
+    }
 }
 
 //XML数据格式
 void MainWindow::on_XML_clicked() {
-    xmlDataProcess();
+    std::string outPutPath;
+    if(xmlDataProcess(outPutPath)){
+        showPicBorse(outPutPath);
+    }
 }
 
 //自定义数据格式
 void MainWindow::on_Customized_clicked() {
-    customizDataProcess();
+    std::string outPutPath;
+    if(customizDataProcess(outPutPath)){
+        showPicBorse(outPutPath);
+    }
 }
 
 

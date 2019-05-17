@@ -37,6 +37,8 @@ distribution.
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <string>
+#include <iostream>
 
 // Help out windows:
 #if defined( _DEBUG ) && !defined( DEBUG )
@@ -663,6 +665,7 @@ public:
 	/// Convenience function to get through elements.
 	const TiXmlElement* FirstChildElement()	const;
 	TiXmlElement* FirstChildElement() {
+        std::cout<<"FirstChildElement"<<std::endl;
 		return const_cast< TiXmlElement* >( (const_cast< const TiXmlNode* >(this))->FirstChildElement() );
 	}
 

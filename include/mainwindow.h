@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <windows.h>
+#include <cstring>
 #include <stdio.h>
 
 namespace Ui {
@@ -19,7 +20,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void showPicBorse();
+    void showPicBorse(std::string path);
 
 private slots:
     void on_Pixel_clicked();

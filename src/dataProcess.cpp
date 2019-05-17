@@ -18,13 +18,13 @@
 #include "include/mainwindow.h"
 
 //像素点数据格式
-void pixDataProcess()
+bool pixDataProcess(std::string &out_put_path)
 {
     //原始图片
     std::string sourcePicdirectory = QFileDialog::getExistingDirectory(nullptr, "选择包含原始jpg文件的文件夹", "/").toLocal8Bit().toStdString();
     if(sourcePicdirectory == "") {
         QMessageBox::critical(nullptr,"错误","未选择文件夹!");
-        return;
+        return false;
     }
     auto pic_names = listFiles(sourcePicdirectory, "jpg;png");
 
@@ -32,7 +32,7 @@ void pixDataProcess()
     std::string pixDatadirectory = QFileDialog::getExistingDirectory(nullptr, "选择包含像素点数据的文件夹", "/").toLocal8Bit().toStdString();
     if(pixDatadirectory == "") {
         QMessageBox::critical(nullptr,"错误","未选择文件夹!");
-        return;
+        return false;
     }
     auto pix_names = listFiles(pixDatadirectory, "png;jpg");
 
@@ -41,6 +41,7 @@ void pixDataProcess()
         DialogMsg msg;
         msg.showMsg(int(data_pair.size()));
         std::string outPutDirectory = QFileDialog::getExistingDirectory(nullptr, "选择输出文件夹", "/").toLocal8Bit().toStdString();
+        out_put_path = outPutDirectory;
         int errorCount = 0;
         //多线程处理
         auto processPic = [&](int process_num, int process_id){
@@ -84,20 +85,22 @@ void pixDataProcess()
         else
             sprintf(s, "处理完成!");
         QMessageBox::information(nullptr,"OK",s);
+        return true;
     }
     else {
         QMessageBox::critical(nullptr,"错误","未发现相匹配的文件!");
     }
+    return false;
 }
 
 //XML数据格式
-void xmlDataProcess()
+bool xmlDataProcess(std::string &out_put_path)
 {
     //原始图片
     std::string sourcePicdirectory = QFileDialog::getExistingDirectory(nullptr, "选择包含原始jpg文件的文件夹", "/").toLocal8Bit().toStdString();
     if(sourcePicdirectory == "") {
         QMessageBox::critical(nullptr,"错误","未选择文件夹!");
-        return;
+        return false;
     }
     auto pic_names = listFiles(sourcePicdirectory, "jpg;png");
 
@@ -105,7 +108,7 @@ void xmlDataProcess()
     std::string xmlDatadirectory = QFileDialog::getExistingDirectory(nullptr, "选择包含XML数据的文件夹", "/").toLocal8Bit().toStdString();
     if(xmlDatadirectory == "") {
         QMessageBox::critical(nullptr,"错误","未选择文件夹!");
-        return;
+        return false;
     }
     auto xml_names = listFiles(xmlDatadirectory, "xml");
 
@@ -116,9 +119,10 @@ void xmlDataProcess()
         DialogMsg msg;
         msg.showMsg(int(data_pair.size()));
         std::string outPutDirectory = QFileDialog::getExistingDirectory(nullptr, "选择输出文件夹", "/").toLocal8Bit().toStdString();
+        out_put_path = outPutDirectory;
         int errorCount = 0;
         //多线程处理
-        auto processPic = [&](int process_num, int process_id){
+        auto processPic = [&](int process_num, int process_id) {
             for(int it=process_id; it<int(data_pair.size()); it+=process_num) {
                 auto &i = data_pair[size_t(it)];
                 QImage pic;
@@ -148,6 +152,7 @@ void xmlDataProcess()
         SYSTEM_INFO sysInfo;
         GetSystemInfo( &sysInfo );
         const int process_num = int(sysInfo.dwNumberOfProcessors);
+//        const int process_num = 1;
         std::thread process[process_num];
         for(int i=0; i<process_num; ++i)
             process[i] = std::thread(processPic, process_num, i);
@@ -161,21 +166,22 @@ void xmlDataProcess()
         else
             sprintf(s, "处理完成!");
         QMessageBox::information(nullptr,"OK",s);
+        return true;
     }
     else {
         QMessageBox::critical(nullptr,"错误","未发现相匹配的文件!");
     }
-
+    return false;
 }
 
 //自定义数据格式
-void customizDataProcess()
+bool customizDataProcess(std::string &out_put_path)
 {
     //原始图片
     std::string sourcePicdirectory = QFileDialog::getExistingDirectory(nullptr, "选择包含原始jpg文件的文件夹", "/").toLocal8Bit().toStdString();
     if(sourcePicdirectory == "") {
         QMessageBox::critical(nullptr,"错误","未选择文件夹!");
-        return;
+        return false;
     }
     auto pic_names = listFiles(sourcePicdirectory, "jpg;png");
 
@@ -183,7 +189,7 @@ void customizDataProcess()
     std::string txtDatadirectory = QFileDialog::getExistingDirectory(nullptr, "选择包含TXT数据的文件夹", "/").toLocal8Bit().toStdString();
     if(txtDatadirectory == "") {
         QMessageBox::critical(nullptr,"错误","未选择文件夹!");
-        return;
+        return false;
     }
     auto txt_names = listFiles(txtDatadirectory, "txt");
 
@@ -192,6 +198,7 @@ void customizDataProcess()
         DialogMsg msg;
         msg.showMsg(int(data_pair.size()));
         std::string outPutDirectory = QFileDialog::getExistingDirectory(nullptr, "选择输出文件夹", "/").toLocal8Bit().toStdString();
+        out_put_path = outPutDirectory;
         int errorCount = 0;
         //多线程处理
         std::atomic_int errorTXT(0);
@@ -243,8 +250,10 @@ void customizDataProcess()
         else
             sprintf(s, "处理完成!");
         QMessageBox::information(nullptr,"OK",s);
+        return true;
     }
     else {
         QMessageBox::critical(nullptr,"错误","未发现相匹配的文件!");
     }
+    return false;
 }

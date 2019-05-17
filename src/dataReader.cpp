@@ -6,13 +6,19 @@
 
 bool ReadParaXml(std::string m_strXmlPath, std::vector<BoxSize>& vecNode)
 {
+    if(m_strXmlPath == "")
+        return false;
     BoxSize *pNode = new BoxSize;
+
     //读取xml文件中的参数值
     TiXmlDocument* Document = new TiXmlDocument();
-    TiXmlElement* RootElement = Document->RootElement();		//根目录
-    if(!Document->LoadFile(m_strXmlPath.c_str())) {
+    if(!Document->LoadFile(m_strXmlPath.c_str()))
+    {
+        std::cin.get();
         return false;
     }
+    TiXmlElement* RootElement = Document->RootElement();		//根目录
+
     TiXmlElement* NextElement = RootElement->FirstChildElement();		//根目录下的第一个节点层
     //for(NextElement;NextElement;NextElement = NextElement->NextSiblingElement())
     while(NextElement!=nullptr)		//判断有没有读完
@@ -20,6 +26,7 @@ bool ReadParaXml(std::string m_strXmlPath, std::vector<BoxSize>& vecNode)
         if(NextElement->ValueTStr() == "object")		//读到object节点
         {
             //NextElement = NextElement->NextSiblingElement();
+
             TiXmlElement* BoxElement = NextElement->FirstChildElement();
             while(BoxElement->ValueTStr() != "bndbox")		//读到box节点
             {
@@ -32,13 +39,13 @@ bool ReadParaXml(std::string m_strXmlPath, std::vector<BoxSize>& vecNode)
             TiXmlElement* xminElemeng = BoxElement->FirstChildElement();
             {
                 //分别读取四个数值
-                pNode->xMin = atoi(xminElemeng->GetText());
+                pNode->xMin = std::atoi(xminElemeng->GetText());
                 TiXmlElement* yminElemeng = xminElemeng->NextSiblingElement();
-                pNode->yMin = atoi(yminElemeng->GetText());
+                pNode->yMin = std::atoi(yminElemeng->GetText());
                 TiXmlElement* xmaxElemeng = yminElemeng->NextSiblingElement();
-                pNode->xMax = atoi(xmaxElemeng->GetText());
+                pNode->xMax = std::atoi(xmaxElemeng->GetText());
                 TiXmlElement* ymaxElemeng = xmaxElemeng->NextSiblingElement();
-                pNode->yMax = atoi(ymaxElemeng->GetText());
+                pNode->yMax = std::atoi(ymaxElemeng->GetText());
 
                 //加入到向量中
                 vecNode.push_back(*pNode);
@@ -46,6 +53,7 @@ bool ReadParaXml(std::string m_strXmlPath, std::vector<BoxSize>& vecNode)
         }
         NextElement = NextElement->NextSiblingElement();
     }
+
     //释放内存
     delete pNode;
     delete Document;

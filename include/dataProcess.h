@@ -1,14 +1,14 @@
 
 #ifndef DATAPROCESS_H
 #define DATAPROCESS_H
-
+#include <string>
 //自定义数据格式
-void customizDataProcess();
+bool customizDataProcess(std::string &out_put_path);
 
 //像素点数据格式
-void pixDataProcess();
+bool pixDataProcess(std::string &out_put_path);
 
 //自定义数据格式
-void xmlDataProcess();
+bool xmlDataProcess(std::string &out_put_path);
 
 #endif
