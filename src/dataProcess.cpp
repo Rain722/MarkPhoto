@@ -7,6 +7,7 @@
 #include <QColor>
 #include <thread>
 #include <QPainter>
+#include "windows.h"
 
 #include "include/dataReader.h"
 #include "include/strTools.h"
@@ -58,13 +59,15 @@ void pixDataProcess()
                         }
                     }
                 }
-                std::string outPutPath = outPutDirectory + std::string("\\") +
+                std::string outPutPath = outPutDirectory + std::string("/") +
                         i.first.substr(i.first.rfind("/")+1, i.first.rfind(".")-i.first.rfind("/")-1)
                         + std::string(".pix.jpg");
                 pic.save(outPutPath.c_str());
             }
         };
-        const int process_num = 6;
+        SYSTEM_INFO sysInfo;
+        GetSystemInfo( &sysInfo );
+        const int process_num = int(sysInfo.dwNumberOfProcessors);
         std::thread process[process_num];
         for(int i=0; i<process_num; ++i)
             process[i] = std::thread(processPic, process_num, i);
@@ -82,7 +85,6 @@ void pixDataProcess()
     else {
         QMessageBox::critical(nullptr,"错误","未发现相匹配的文件!");
     }
-
 }
 
 //XML数据格式
@@ -134,13 +136,15 @@ void xmlDataProcess()
                 for(auto &p: lines)
                     painter.drawRect(p.xMin,p.yMin,p.xMax-p.xMin,p.yMax-p.yMin);
                 painter.end();
-                std::string outPutPath = outPutDirectory + std::string("\\") +
+                std::string outPutPath = outPutDirectory + std::string("/") +
                         i.first.substr(i.first.rfind("/")+1, i.first.rfind(".")-i.first.rfind("/")-1)
                         + std::string(".xml.jpg");
                 pic.save(outPutPath.c_str());
             }
         };
-        const int process_num = 6;
+        SYSTEM_INFO sysInfo;
+        GetSystemInfo( &sysInfo );
+        const int process_num = int(sysInfo.dwNumberOfProcessors);
         std::thread process[process_num];
         for(int i=0; i<process_num; ++i)
             process[i] = std::thread(processPic, process_num, i);
@@ -214,13 +218,15 @@ void customizDataProcess()
                     painter.drawRect(p.xMin,p.yMin,p.xMax-p.xMin,p.yMax-p.yMin);
                 }
                 painter.end();
-                std::string outPutPath = outPutDirectory + std::string("\\") +
+                std::string outPutPath = outPutDirectory + std::string("/") +
                         i.first.substr(i.first.rfind("/")+1, i.first.rfind(".")-i.first.rfind("/")-1)
                         + std::string(".txt.jpg");
                 pic.save(outPutPath.c_str());
             }
         };
-        const int process_num = 6;
+        SYSTEM_INFO sysInfo;
+        GetSystemInfo( &sysInfo );
+        const int process_num = int(sysInfo.dwNumberOfProcessors);
         std::thread process[process_num];
         for(int i=0; i<process_num; ++i)
             process[i] = std::thread(processPic, process_num, i);
