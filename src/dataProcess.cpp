@@ -53,8 +53,12 @@ bool pixDataProcess(std::string &out_put_path)
             for(int it=process_id; it<int(data_pair.size()); it+=process_num) {
                 auto &i = data_pair[size_t(it)];
                 QImage pic, pix;
-                pic.load(i.first.c_str());
-                pix.load(i.second.c_str());
+                try {
+                    pic.load(i.first.c_str());
+                    pix.load(i.second.c_str());
+                } catch (...) {
+                    fprintf(stderr, "exception happened\n");
+                }
                 if(pic.size().width()!=pix.size().width() || pic.size().height()!=pix.size().height()){
                     errorCount ++;
                     continue;
@@ -119,8 +123,10 @@ bool xmlDataProcess(std::string &out_put_path)
     auto xml_names = listFiles(xmlDatadirectory, "xml");
 
     auto data_pair = getCommonStrPair(pic_names, xml_names);
+
     std::atomic_int errorXML(0);
     std::atomic_int errorPic(0);
+
     if(data_pair.size() > 0) {
         DialogMsg msg;
         msg.showMsg(int(data_pair.size()));
@@ -244,7 +250,7 @@ bool customizDataProcess(std::string &out_put_path)
                 painter.end();
                 std::string outPutPath = outPutDirectory + std::string("/") +
                         i.first.substr(i.first.rfind("/")+1, i.first.rfind(".")-i.first.rfind("/")-1)
-                        + std::string(".txt.jpg");
+                        + std::string(".top15_txt.jpg");
                 pic.save(outPutPath.c_str());
             }
             process_count --;
@@ -258,7 +264,6 @@ bool customizDataProcess(std::string &out_put_path)
             QCoreApplication::processEvents();
             Sleep(1);
         }
-
         msg.disShow();
         char s[100];
         if(errorCount != 0)

@@ -8,8 +8,6 @@ bool ReadParaXml(std::string m_strXmlPath, std::vector<BoxSize>& vecNode)
 {
     if(m_strXmlPath == "")
         return false;
-    BoxSize *pNode = new BoxSize;
-
     //读取xml文件中的参数值
     TiXmlDocument* Document = new TiXmlDocument();
     if(!Document->LoadFile(m_strXmlPath.c_str()))
@@ -17,6 +15,8 @@ bool ReadParaXml(std::string m_strXmlPath, std::vector<BoxSize>& vecNode)
         std::cin.get();
         return false;
     }
+
+    BoxSize *pNode = new BoxSize;
     TiXmlElement* RootElement = Document->RootElement();		//根目录
 
     TiXmlElement* NextElement = RootElement->FirstChildElement();		//根目录下的第一个节点层
