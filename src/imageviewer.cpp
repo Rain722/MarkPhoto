@@ -21,10 +21,11 @@ ImageViewer::ImageViewer(QWidget *parent) : QWidget(parent)
     
     main_layout = new QVBoxLayout(this);
     main_layout->addWidget(image_label);
+//    main_layout->setAlignment(Qt::AlignVCenter);
     
     btn_prev = new QPushButton("上一张");
-    //QPushButton* btn_zoom_out = new QPushButton("-");
-    //QPushButton* btn_zoom_in = new QPushButton("+");
+    QPushButton* btn_zoom_out = new QPushButton("-");
+    QPushButton* btn_zoom_in = new QPushButton("原始分辨率");
     btn_next = new QPushButton("下一张");
     
     QSpacerItem* item_left = new QSpacerItem(75, 40, QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -33,18 +34,18 @@ ImageViewer::ImageViewer(QWidget *parent) : QWidget(parent)
     tool_layout = new QHBoxLayout();
     tool_layout->addSpacerItem(item_left);
     tool_layout->addWidget(btn_prev);
-    //tool_layout->addWidget(btn_zoom_out);
-    //tool_layout->addWidget(btn_zoom_in);
     tool_layout->addWidget(btn_next);
-    tool_layout->addSpacerItem(item_right);
+    tool_layout->addSpacerItem(item_right);    
+    // tool_layout->addWidget(btn_zoom_out);
+    tool_layout->addWidget(btn_zoom_in);
     
     main_layout->addLayout(tool_layout);
     
     this->setLayout(main_layout);
     this->setStyleSheet("background-color: rgb(167, 175, 159);");
     
-    //connect(btn_zoom_out, SIGNAL(clicked(bool)), this, SLOT(on_click_btn_zoom_out()));
-    //connect(btn_zoom_in, SIGNAL(clicked(bool)), this, SLOT(on_click_btn_zoom_in()));
+    connect(btn_zoom_out, SIGNAL(clicked(bool)), this, SLOT(on_click_btn_zoom_out()));
+    connect(btn_zoom_in, SIGNAL(clicked(bool)), this, SLOT(on_click_btn_zoom_in()));
     connect(btn_prev, SIGNAL(clicked(bool)), this, SLOT(on_click_btn_prev()));
     connect(btn_next, SIGNAL(clicked(bool)), this, SLOT(on_click_btn_next()));
 }
@@ -63,8 +64,8 @@ bool ImageViewer::loadFile(const QString &fileName)
 void ImageViewer::setImage(const QImage &newImage)
 {
     image = newImage;
+    image_label->setAlignment(Qt::AlignCenter);
     image_label->setPixmap(QPixmap::fromImage(image));
-    
     scaleFactor = 1.0;
 }
 
@@ -90,12 +91,12 @@ void ImageViewer::on_click_btn_next()
 
 void ImageViewer::zoomOut()
 {
-    scaleImage(0.8);
+    scaleImage(1.0/1.2);
 }
 
 void ImageViewer::zoomIn()
 {
-    scaleImage(1.2);
+    scaleImage(1);
 }
 
 void ImageViewer::scaleImage(double factor)

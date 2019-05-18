@@ -1,4 +1,6 @@
 
+
+
 #include "include/DialogMsg.h"
 
 DialogMsg::DialogMsg(){
