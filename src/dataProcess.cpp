@@ -7,6 +7,7 @@
 #include <QColor>
 #include <thread>
 #include <QPainter>
+#include <QCoreApplication>
 #include "windows.h"
 
 #include "include/dataReader.h"
@@ -42,8 +43,12 @@ bool pixDataProcess(std::string &out_put_path)
         msg.showMsg(int(data_pair.size()));
         std::string outPutDirectory = QFileDialog::getExistingDirectory(nullptr, "选择输出文件夹", "/").toLocal8Bit().toStdString();
         out_put_path = outPutDirectory;
-        int errorCount = 0;
+        std::atomic_int errorCount(0);
         //多线程处理
+        SYSTEM_INFO sysInfo;
+        GetSystemInfo( &sysInfo );
+        const int process_num = int(sysInfo.dwNumberOfProcessors);
+        std::atomic_int process_count(process_num);
         auto processPic = [&](int process_num, int process_id){
             for(int it=process_id; it<int(data_pair.size()); it+=process_num) {
                 auto &i = data_pair[size_t(it)];
@@ -68,20 +73,21 @@ bool pixDataProcess(std::string &out_put_path)
                         + std::string(".pix.jpg");
                 pic.save(outPutPath.c_str());
             }
+            process_count --;
         };
-        SYSTEM_INFO sysInfo;
-        GetSystemInfo( &sysInfo );
-        const int process_num = int(sysInfo.dwNumberOfProcessors);
         std::thread process[process_num];
         for(int i=0; i<process_num; ++i)
             process[i] = std::thread(processPic, process_num, i);
         for(int i=0; i<process_num; ++i)
-            process[i].join();
-
+            process[i].detach();
+        while(process_count != 0){
+            QCoreApplication::processEvents();
+            Sleep(1);
+        }
         msg.disShow();
         char s[100];
         if(errorCount != 0)
-            sprintf(s, "处理完成，期中%d对发生错误(分辨率不匹配)!", errorCount);
+            sprintf(s, "处理完成，期中%d对发生错误(分辨率不匹配)!", int(errorCount));
         else
             sprintf(s, "处理完成!");
         QMessageBox::information(nullptr,"OK",s);
@@ -120,7 +126,11 @@ bool xmlDataProcess(std::string &out_put_path)
         msg.showMsg(int(data_pair.size()));
         std::string outPutDirectory = QFileDialog::getExistingDirectory(nullptr, "选择输出文件夹", "/").toLocal8Bit().toStdString();
         out_put_path = outPutDirectory;
-        int errorCount = 0;
+        std::atomic_int errorCount(0);
+        SYSTEM_INFO sysInfo;
+        GetSystemInfo( &sysInfo );
+        const int process_num = int(sysInfo.dwNumberOfProcessors);
+        std::atomic_int process_count(process_num);
         //多线程处理
         auto processPic = [&](int process_num, int process_id) {
             for(int it=process_id; it<int(data_pair.size()); it+=process_num) {
@@ -148,21 +158,21 @@ bool xmlDataProcess(std::string &out_put_path)
                         + std::string(".xml.jpg");
                 pic.save(outPutPath.c_str());
             }
+            process_count --;
         };
-        SYSTEM_INFO sysInfo;
-        GetSystemInfo( &sysInfo );
-        const int process_num = int(sysInfo.dwNumberOfProcessors);
-//        const int process_num = 1;
         std::thread process[process_num];
         for(int i=0; i<process_num; ++i)
             process[i] = std::thread(processPic, process_num, i);
         for(int i=0; i<process_num; ++i)
-            process[i].join();
-
+            process[i].detach();
+        while(process_count != 0){
+            QCoreApplication::processEvents();
+            Sleep(1);
+        }
         msg.disShow();
         char s[100];
         if(errorCount != 0)
-            sprintf(s, "处理完成，期中%d对发生错误(分辨率不匹配)!", errorCount);
+            sprintf(s, "处理完成，期中%d对发生错误(分辨率不匹配)!", int(errorCount));
         else
             sprintf(s, "处理完成!");
         QMessageBox::information(nullptr,"OK",s);
@@ -199,7 +209,11 @@ bool customizDataProcess(std::string &out_put_path)
         msg.showMsg(int(data_pair.size()));
         std::string outPutDirectory = QFileDialog::getExistingDirectory(nullptr, "选择输出文件夹", "/").toLocal8Bit().toStdString();
         out_put_path = outPutDirectory;
-        int errorCount = 0;
+        std::atomic_int errorCount(0);
+        SYSTEM_INFO sysInfo;
+        GetSystemInfo( &sysInfo );
+        const int process_num = int(sysInfo.dwNumberOfProcessors);
+        std::atomic_int process_count(process_num);
         //多线程处理
         std::atomic_int errorTXT(0);
         std::atomic_int errorPic(0);
@@ -233,20 +247,22 @@ bool customizDataProcess(std::string &out_put_path)
                         + std::string(".txt.jpg");
                 pic.save(outPutPath.c_str());
             }
+            process_count --;
         };
-        SYSTEM_INFO sysInfo;
-        GetSystemInfo( &sysInfo );
-        const int process_num = int(sysInfo.dwNumberOfProcessors);
         std::thread process[process_num];
         for(int i=0; i<process_num; ++i)
             process[i] = std::thread(processPic, process_num, i);
         for(int i=0; i<process_num; ++i)
-            process[i].join();
+            process[i].detach();
+        while(process_count != 0){
+            QCoreApplication::processEvents();
+            Sleep(1);
+        }
 
         msg.disShow();
         char s[100];
         if(errorCount != 0)
-            sprintf(s, "处理完成，期中%d对发生错误(分辨率不匹配)!", errorCount);
+            sprintf(s, "处理完成，期中%d对发生错误(分辨率不匹配)!", int(errorCount));
         else
             sprintf(s, "处理完成!");
         QMessageBox::information(nullptr,"OK",s);

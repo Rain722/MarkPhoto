@@ -1,6 +1,7 @@
 #include "include/strTools.h"
 #include <io.h>
 #include <algorithm>
+#include <QCoreApplication>
 
 bool startWith(std::string s, std::string sub) {
     transform(s.begin(),s.end(),s.begin(),::tolower);
@@ -67,7 +68,6 @@ std::vector<std::pair<std::string, std::string>>
     std::vector<std::pair<std::string, std::string> > pair_arr;
     for(auto &i : pic_names){
         for(auto &j : data_names) {
-//            std::cout<<i<<" "<<j<<std::endl;
             auto istart = i.rfind("/"), iend = i.rfind(".");
             auto jstart = j.rfind("/"), jend = j.rfind(".");
             if(iend-istart != jend-jstart)
@@ -77,6 +77,7 @@ std::vector<std::pair<std::string, std::string>>
             if(one == two)
                 pair_arr.push_back(std::make_pair(i, j));
         }
+        QCoreApplication::processEvents();
     }
     return pair_arr;
 }
