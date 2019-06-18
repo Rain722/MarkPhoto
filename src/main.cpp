@@ -8,7 +8,8 @@
 int main(int argc, char *argv[])
 {
 
-    QApplication a(argc, argv);
+    //dd
+    QApplication a(argc, argv); //doc
     MainWindow w;
     w.show();
 
